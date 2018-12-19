@@ -49,4 +49,4 @@ if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=5001)
 ```
 
-See [examples/](tree/master/examples) for more.
+See [examples/](/steinnes/bugsnag-asgi/tree/master/examples) for more.
