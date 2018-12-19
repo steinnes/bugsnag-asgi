@@ -16,20 +16,34 @@ class BugsnagMiddleware:
         inner = self.app(asgi_scope)
         try:
             await inner(receive, send)
-            bugsnag.clear_request_config()
         except Exception as exc:
+            bugsnag.configure_request(last_frame_locals=self.get_locals(exc))
             bugsnag.notify(exc)
             raise exc from None
+        finally:
+            bugsnag.clear_request_config()
+
+    def get_locals(self, exception):
+        try:
+            tb = exception.__traceback__
+            while True:
+                if tb.tb_next is not None:
+                    tb = tb.tb_next
+                else:
+                    break
+            return tb.tb_frame.f_locals
+        except Exception as e:
+            return {'error': 'Could not collect locals ({})'.format(e)}
 
     def add_context_to_notification(self, notification):
         scope = notification.request_config.asgi_scope
-        print("asgi scope of error request:", scope)
 
         notification.add_tab("request", {
             "url": self.get_url(scope),
             "query": self.get_query(scope),
             "headers": self.get_headers(scope),
         })
+        notification.add_tab("locals", notification.request_config.last_frame_locals)
 
     def get_url(self, scope):
         """
