@@ -17,8 +17,7 @@ class BugsnagMiddleware:
         try:
             await inner(receive, send)
         except Exception as exc:
-            bugsnag.configure_request(last_frame_locals=self.get_locals(exc))
-            bugsnag.notify(exc)
+            bugsnag.notify(exc, meta_data={'locals': self.get_locals(exc)})
             raise exc from None
         finally:
             bugsnag.clear_request_config()
@@ -43,7 +42,6 @@ class BugsnagMiddleware:
             "query": self.get_query(scope),
             "headers": self.get_headers(scope),
         })
-        notification.add_tab("locals", notification.request_config.last_frame_locals)
 
     def get_url(self, scope):
         """
