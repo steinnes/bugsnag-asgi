@@ -6,3 +6,8 @@ templates
 venv
 *.egg-info
 .env
+build/
+dist/
+.tox/
+.DS_Store
+.python-version
