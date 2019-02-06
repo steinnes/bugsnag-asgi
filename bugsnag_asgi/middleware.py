@@ -35,13 +35,19 @@ class BugsnagMiddleware:
             return {'error': 'Could not collect locals ({})'.format(e)}
 
     def add_context_to_notification(self, notification):
-        scope = notification.request_config.asgi_scope
+        try:
+            scope = notification.request_config.asgi_scope
+            url = self.get_url(scope)
+            query = self.get_query(scope)
+            headers = self.get_headers(scope)
+        except AttributeError:
+            # For some cases, possibly background tasks, the request_config.configure(asgi_scope=..) has not
+            # been called, causing an AttributeError in 'scope = notification.request_config.asgi_scope'
+            url = 'n/a'
+            query = 'n/a'
+            headers = 'n/a'
 
-        notification.add_tab("request", {
-            "url": self.get_url(scope),
-            "query": self.get_query(scope),
-            "headers": self.get_headers(scope),
-        })
+        notification.add_tab('request', {'url': url, 'query': query, 'headers': headers})
 
     def get_url(self, scope):
         """
