@@ -21,4 +21,5 @@ setup(
     keywords=['bugsnag', 'asgi', 'exceptions'],
     install_requires=['bugsnag'],
     packages=find_packages(),
+    license='MIT',
 )
